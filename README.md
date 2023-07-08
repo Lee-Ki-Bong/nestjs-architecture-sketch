@@ -242,7 +242,8 @@ export class TestGuard implements CanActivate {
 - Nest.js는 데코레이터를 사용하여 라우팅을 정의하는 방식을 지원
 - @Controller() 데코레이터를 사용하여 컨트롤러 클래스에 라우팅 경로를 정의
 - @Get(), @Post(), @Put(), @Delete() 등의 데코레이터를 사용하여 해당 경로에 대한 HTTP 메서드를 정의
-- 아래는 /users 경로에 대한 GET 요청을 처리하는 UserController 클래스를 예시로 들어보았다. (현재 AppController 에 데커레이터엔 빈문자열 이기때문에 / 경로가 된다.)
+- 아래는 /users 경로에 대한 GET 요청을 처리하는 UserController 클래스를 예시로 들어보았다.
+- 현재 AppController의 데커레이터엔 빈문자열 이기때문에 / 가 경로가 된다.
 
 ```javascript
 @Controller('users')
@@ -270,7 +271,51 @@ export class AppService {
 }
 ```
 
-### 이벤트 루프 육안으로 체험
+### 모듈
+
+- @Module 데코레이터는 해당 모듈에 대한 설정과 의존성을 정의한다.
+- NestJS의 계층구조를 체험해보기 위해 Test 프로파이더들을 애플리케이션 전역에 등록하는 방법을 소개한다.
+  - main.js 에 등록하는 방법도 있지만 이 방법이 공식 권장 방법이다.
+  - 이 tutorial 은 애플리케이션 전체에 대한 등록을 가이드하였지만, 특정 라우터, 메서드에만 적용도 가능하다. 방법은 [docs](https://docs.nestjs.com/)를 참고하길 바란다.
+
+```javascript
+@Module({
+  imports: [], // 다른 모듈을 가져오는 부분
+  controllers: [AppController], // 컨트롤러를 등록하는 부분
+  providers: [
+    // 프로바이더를 등록하는 부분
+
+    AppService, // 서비스를 등록
+
+    // APP_GUARD를 통해 애플리케이션 전체에 대한 가드를 등록.
+    {
+      provide: APP_GUARD,
+      useClass: TestGuard,
+    },
+
+    // APP_INTERCEPTOR를 통해 애플리케이션 전체에 대한 인터셉터를 등록.
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TestInterceptor,
+    },
+
+    // APP_FILTER를 통해 애플리케이션 전체에 대한 필터를 등록.
+    {
+      provide: APP_FILTER,
+      useClass: TestExceptionFilter,
+    },
+  ],
+})
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    // MiddlewareConsumer를 통해 미들웨어를 등록하는 부분.
+    // TestMiddleware를 등록하고, 모든 라우트('*')에 미들웨어를 적용.
+    consumer.apply(TestMiddleware).forRoutes('*');
+  }
+}
+```
+
+## 이벤트 루프 육안으로 체험
 
 - 프로젝트를 구동
 
