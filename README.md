@@ -2,11 +2,11 @@
 
 처음부터 너무 많은 개념을 동시에 제공하면 책상에 두꺼운 책을 턱하니 올려놓는 것과 같을 것이다. ~~(docs를 잘 보지 않는 이유…)~~
 
-빈 캔버스에 그림을 그리듯이 NestJS를 전체적으로 스케치 한 뒤, 부위 별로 색을 채워가는 형태의 tutorial 을 구상해보았다.
+빈 캔버스에 그림을 그리듯이 NestJS를 전체적으로 스케치 하고, 부위 별로 색을 채워가는 형태의 tutorial 을 구상해보았다.
 
-이 tutorial 은 NestJS 가 어떻게 디자인 되어있는지 소개하면서 핵심적인 개념과 기능에 초점을 맞추었다.
+이 tutorial 은 스케치에 해당하며, NestJS 가 어떻게 디자인 되어있는지 소개하는 데에 초점을 두었다.
 
-더 자세한 정보를 얻고자 한다면 공식 docs를 정독하길 바란다. [링크](https://docs.nestjs.com/)
+더 자세한 정보를 얻고자 한다면 공식 docs를 정독해보길 바란다. [링크](https://docs.nestjs.com/)
 
 ## 핵심개념
 
@@ -23,7 +23,7 @@ NestJS를 살펴보기 전에 딱 두 가지 개념을 간단히 소개하고 �
 
 ### 정리
 
-- 정리하자면, Ioc는 추상적인 개념이고 이를 실제 구현한 것이 DI 로 이해하면 된다.
+- 정리하자면, Ioc는 추상적인 개념이고 이를 구현한 것이 DI 로 이해하면 된다.
 - Nestjs는 의존성 주입(Dependency Injection)을 통해 IoC 제어 역전(Inversion of Control)를 구현한 프레임워크 이다.
 - 프레임워크가 의존성을 관리해주기 때문에 앞으로 제시하는 코드에서는 new 연산자는 보이지 않을 것이다.
 
@@ -90,8 +90,9 @@ NestJS는 다음과 같은 핵심구성들과 각각의 원칙들이 존재한�
 
 - 파이프는 요청 데이터의 유효성 검사, 변환 및 필터링 처리를 수행한다.
 - 내장된 몇 가지 유용한 파이프를 제공하며, 직접 커스텀 하여 사용할 수 있다.
+- 패키지 설치가 필요하며, 자세한 내용은 다음 tutorial 에서 다루겠다.
 
-## NestJS 들여다보기
+## NestJS 맛보기
 
 ### 프로젝트 생성
 
@@ -100,4 +101,200 @@ root@8aece4bfc5fa:/home# nest new
 ⚡  We will scaffold your app in a few seconds..
 ? What name would you like to use for the new project? nest-sketch
 ? Which package manager would you ❤️  to use? npm
+```
+
+- 이 프로젝트에서는 체험이 목적이기에 디렉토리구조는 신경쓰지 않고 모두 src/ 에 두 엇다.
+
+### 미들웨어 작성
+
+```javascript
+//src/test.middleware.ts
+import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+
+@Injectable()
+export class TestMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    // 요청 처리 로직 작성
+    // 요청 가공 & 요청 로깅 & 인증 확인 등의 작업 수행가능
+
+    res.on('finish', () => {
+      // 응답 처리 로직 작성
+      // 응답 로깅, 헤더 설정, 캐싱 등의 작업을 수행가능
+    });
+
+    // 다음 미들웨어나 라우터 핸들러로 제어를 전달
+    // 만약 next()를 호출않는다면, 여기서 종료되며 다음 미들웨어나 라우터 핸들러는 실행되지 않음.
+    next();
+  }
+}
+```
+
+### 인터셉터 작성
+
+```javascript
+//src/test.interceptor.ts
+@Injectable()
+export class TestInterceptor implements NestInterceptor {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<any> | Promise<Observable<any>> {
+    // 컨트롤러 메서드 실행 전에 실행된다
+    // 이 부분에서 요청을 가로채 인증 확인, 데이터 변환, 로깅 등 작업을 수행가능.
+
+    // next.handle()은 다음 단계의 핸들러를 호출하고, 해당 핸들러의 Observable을 반환.
+    return next.handle().pipe(
+      // tap() 오퍼레이터를 사용하여 응답을 가공하거나 추가 작업을 수행가능.
+      // tap() 외에 다양한 오퍼레이터(Operator)를 적용할 수 있다. 찾아보길 바람.
+      tap((response) => {
+        // 컨트롤러 메서드 실행 후 응답을 가공하거나 응답 로깅, 헤더 설정, 캐싱 등 추가 작업을 수행가능.
+      }),
+    );
+  }
+}
+```
+
+### [잠깐] 미들웨어 VS 인터셉터
+
+### [요약] 주요 기능은 Nest.js의 컨트롤러와 인터셉터를 통해 구현하는 것을 권장
+
+- 두 기능설명을 보면 겹치는 부분이 많을 것이다.
+- 먼저 결론부터 말하면 인터셉터를 사용하는 것이 권장사항이다.
+  - Nest.js의 미들웨어(Middleware) 이 기능은 Nest.js가 Express.js 위에서 구축된 프레임워크이였기 때문에 Express.js를 사용하던 개발자들이 Nest.js로 마이그레이션하거나 Nest.js에서 Express.js 기반 애플리케이션을 개발할 때 이전 코드를 보다 쉽게 재사용할 수 있도록 만들어진 기능이다.
+  - 그러나, Nest.js는 Express.js만을 위한 프레임워크가 아니다.
+- Nest.js는 자체적으로 추상화된 HTTP 요청-응답 계층을 나누어 제공하고 있다. (컨트롤러 <-> 인터셉터)
+- 그리고, 미들웨어는 요청객체와 응답객체만을 받을 수 있지만, 인터셉터는 ExecutionContext를 통해 더 넓은 범위의 컨텍스트 정보에 접근할 수 있기 때문에 더 유연한 방식으로 활용될 수 있다.
+
+### 필터 작성
+
+- [참고] 아래 코드는 소개를 위해 작성되었기 때문에 온전한 예외처리를 위해선 추가적인 작업이 필요하다.
+
+```javascript
+@Catch()
+export class TestExceptionFilter implements ExceptionFilter {
+  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+
+  catch(exception: unknown, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+
+    /**
+     * @step 1 : 필요 정보를 가져온다
+     */
+    const statusCode = exception.getStatus();
+    const message = exception.message;
+
+    /**
+     * @step 2 : 응답 가공
+     */
+    const responseBody = {
+      statusCode: statusCode,
+      path: this.httpAdapterHost.httpAdapter.getRequestUrl(ctx.getRequest()),
+      message,
+    };
+
+    /**
+     * @step 3 : 다시 httpAdapter 에게 전달
+     */
+    this.httpAdapterHost.httpAdapter.reply(
+      ctx.getResponse(),
+      responseBody,
+      statusCode,
+    );
+  }
+```
+
+### 가드 작성
+
+```javascript
+@Injectable()
+export class TestGuard implements CanActivate {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    // 이 블록 내에서 ExecutionContext를 통해 요청과 응답에 대한 정보를 확인
+    // 사용자 인증, 접근 권한 확인 등의 작업
+
+    const authenticationResult = true; // 다음 가드나 컨트롤러로 넘어간다.
+    // const authenticationResult = false; // 403 예외를 발생시킨다.
+
+    // 반환 값에 따라 다음 가드나 컨트롤러로의 제어 흐름이 결정
+    return authenticationResult;
+  }
+}
+```
+
+### @Injectable()와 @Catch()
+
+- 이걸 처음보는 사람은 무엇인지 궁금할 것이다. 이것은 데커레이터 라는 것이다.
+- 이 tutorial 에서는 아래와 같이 고유한 기능을 소개하겠다.
+  - @Injectable() : 이 데코레이터를 통해 의존성을 주입할 수 있다는 것.
+  - @Catch() : 이 데코레이터를 통해 필터에서 예외필터 정의가 가능해지고 구현한 필터를 의존성 주입할 수 있다.
+
+### 데커레이터
+
+- 데커레이터에 대해 자세히 알고싶다면 docs를 찾아보길 바란다. [링크](https://docs.nestjs.com/custom-decorators)
+- 간단히 요약하자면 데커레이터는 함수이며 프레임워크나 패키지에서 제공되는 데커레이터는 고유한 기능들이 존재한다.
+- 특별한 경우 사용자정의 데커레이터도 정의하여 사용 가능하다.
+
+### 컨트롤러
+
+- Nest.js는 데코레이터를 사용하여 라우팅을 정의하는 방식을 지원
+- @Controller() 데코레이터를 사용하여 컨트롤러 클래스에 라우팅 경로를 정의
+- @Get(), @Post(), @Put(), @Delete() 등의 데코레이터를 사용하여 해당 경로에 대한 HTTP 메서드를 정의
+- 아래는 /users 경로에 대한 GET 요청을 처리하는 UserController 클래스를 예시로 들어보았다. (현재 AppController 에 데커레이터엔 빈문자열 이기때문에 / 경로가 된다.)
+
+```javascript
+@Controller('users')
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @Get()
+  findUsers(): User[] {
+    return this.userService.findUsers();
+  }
+}
+```
+
+### 서비스
+
+- 컨트롤러와 데이터 접근 계층 사이의 중간 역할.
+- 데이터 접근 계층과의 관계 구현 설명은 다음에 다루겠다.
+
+```javascript
+@Injectable()
+export class AppService {
+  getHello(): string {
+    return 'Hello World!';
+  }
+}
+```
+
+### 이벤트 루프 육안으로 체험
+
+- 프로젝트를 구동
+
+```
+npm run start:dev
+```
+
+- localhost:3000 로 GET 요청
+- 호출 순서를 주의 깊게 봐주길 바란다.
+  - 정상 응답시 : 미들웨어, 가드, 인터셉터, 컨트롤러, 미들웨어 가 호출 순서.
+  - 예외발 생시 : 미들웨어, 가드, 예외필터, 미들웨어 가 호출순서.
+
+```
+# 성공시 : AppController 의 getHello 가 호출된 모습
+[Nest] 516  - 07/08/2023, 1:26:33 PM   DEBUG [TestMiddleware] [Request] GET
+[Nest] 516  - 07/08/2023, 1:26:33 PM     LOG [TestGuard] I'm test Guard
+[Nest] 516  - 07/08/2023, 1:26:33 PM     LOG [TestInterceptor] [http] [AppController] [GET] [/] ["Hello World!"] 1ms
+[Nest] 516  - 07/08/2023, 1:26:33 PM   DEBUG [TestMiddleware] [Response] statusCode: 200 +13ms
+```
+
+```
+# 예외 발생시
+[Nest] 475  - 07/08/2023, 1:10:14 PM   DEBUG [TestMiddleware] [Request] GET
+[Nest] 475  - 07/08/2023, 1:10:14 PM     LOG [TestGuard] I'm test Guard
+[Nest] 475  - 07/08/2023, 1:10:14 PM     LOG [TestExceptionFilter] [403] Forbidden resource // 가드 인증을 통과 못하였을때
+[Nest] 475  - 07/08/2023, 1:10:14 PM   DEBUG [TestMiddleware] [Response] statusCode: 403 +11ms // 403 예외 발생한 모습
 ```
