@@ -157,8 +157,6 @@ export class TestInterceptor implements NestInterceptor {
 
 ### [잠깐] 미들웨어 VS 인터셉터
 
-### [요약] 주요 기능은 Nest.js의 컨트롤러와 인터셉터를 통해 구현하는 것을 권장
-
 - 두 기능설명을 보면 겹치는 부분이 많을 것이다.
 - 먼저 결론부터 말하면 인터셉터를 사용하는 것이 권장사항이다.
   - Nest.js의 미들웨어(Middleware) 이 기능은 Nest.js가 Express.js 위에서 구축된 프레임워크이였기 때문에 Express.js를 사용하던 개발자들이 Nest.js로 마이그레이션하거나 Nest.js에서 Express.js 기반 애플리케이션을 개발할 때 이전 코드를 보다 쉽게 재사용할 수 있도록 만들어진 기능이다.
