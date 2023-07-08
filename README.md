@@ -103,7 +103,7 @@ root@8aece4bfc5fa:/home# nest new
 ? Which package manager would you ❤️  to use? npm
 ```
 
-- 이 프로젝트에서는 체험이 목적이기에 디렉토리구조는 신경쓰지 않고 모두 src/ 에 두 엇다.
+- 이 프로젝트에서는 체험이 목적이기에 디렉토리구조는 신경쓰지 않고 모두 src/ 에 두엇다.
 
 ### 미들웨어 작성
 
