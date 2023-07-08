@@ -368,7 +368,7 @@ npm run start:dev
 
 ### 만약 같은 종류의 프로바이더가 있을시 등록 역순임을 명심해야한다.
 
-- Interceptor_2 가 실행된 후 Interceptor_2 실행.
+- Interceptor_2 가 실행된 후 Interceptor_1 실행.
 - 이건 필터와 가드도 마찬가지 이다.
 
 ```javascript
