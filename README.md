@@ -99,7 +99,7 @@ NestJS는 다음과 같은 핵심 구성들이 존재한다.
 
 - 파이프는 요청 데이터의 유효성 검사, 변환 및 필터링 처리를 수행한다.
 - 내장된 몇 가지 유용한 파이프를 제공하며, 직접 커스텀 하여 사용할 수 있다.
-- 패키지 설치가 필요하며, 자세한 내용은 다음 tutorial 에서 다루겠다.
+- 패키지 설치가 필요하며, 자세한 내용은 [validate pipe tutorial](https://git.nm.koapp.com/npm-dev/backend/nestjs-validate-pipe-tutorial/-/blob/develop/README.md#%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0-%EC%A0%84%EC%97%90) 에서 다루겠다.
 
 #
 
