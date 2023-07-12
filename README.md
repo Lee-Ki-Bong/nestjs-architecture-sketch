@@ -70,7 +70,7 @@ NestJS는 다음과 같은 핵심 구성들이 존재한다.
 
 - 데이터베이스와의 상호작용을 담당한다.
 - ORM(Object-Relational Mapping) 라이브러리를 사용하는데, TypeORM을 사용할 것이다.
-- 자세한 내용은 Typeorm tutorial 에서 다루겠다.(https://git.nm.koapp.com/npm-dev/backend/nestjs-typeorm-tutorial/-/blob/develop/README.md#%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0-%EC%A0%84%EC%97%90)
+- 자세한 내용은 [Typeorm tutorial](https://git.nm.koapp.com/npm-dev/backend/nestjs-typeorm-tutorial/-/blob/develop/README.md#%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0-%EC%A0%84%EC%97%90) 에서 다루겠다.
 
 ### 미들웨어(Middleware):
 
